@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { signIn } from "@/lib/auth";
 import { getCampaignTemplate } from "@/lib/templates/campaign-templates";
 
@@ -25,10 +26,15 @@ export default async function LoginPage({
 
   async function sendMagicLink(formData: FormData) {
     "use server";
+    // redirect:false so next-auth v5 sends the email and returns instead of
+    // throwing its own verify-request redirect (which logs UnknownAction and
+    // shows a broken page). We then redirect to the custom confirmation page.
     await signIn("resend", {
       email: String(formData.get("email") ?? ""),
       redirectTo: callbackUrl,
+      redirect: false,
     });
+    redirect("/verify-request");
   }
 
   return (
